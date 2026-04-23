@@ -41,7 +41,7 @@ export interface Company {
   industry?: string;
 }
 
-// ─── Products / Inventory ────────────────────────────────────────────────────
+// ─── Products ────────────────────────────────────────────────────────────────
 
 export interface Product {
   id: string;
@@ -51,7 +51,75 @@ export interface Product {
   stock?: number;
 }
 
-// ─── API helpers ─────────────────────────────────────────────────────────────
+// ─── Inventory ───────────────────────────────────────────────────────────────
+
+export type ItemType = 'MATERIAL' | 'PRODUCT';
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  sku?: string;
+  type: ItemType;
+  unitOfMeasure?: string;
+  unitCost?: number;
+  stock: number;
+  createdAt: string;
+}
+
+export interface CreateInventoryItemPayload {
+  name: string;
+  sku?: string;
+  type: ItemType;
+  unitOfMeasure?: string;
+  unitCost?: number;
+  stock?: number;
+}
+
+// ─── BOMs / Recetas ──────────────────────────────────────────────────────────
+
+export interface BomComponent {
+  materialId: string;
+  quantity: number;
+}
+
+export interface Bom {
+  id: string;
+  name: string;
+  productId?: string;
+  components: BomComponent[];
+  createdAt: string;
+}
+
+export interface CreateBomPayload {
+  name: string;
+  productId?: string;
+  components: BomComponent[];
+}
+
+// ─── Production Orders ────────────────────────────────────────────────────────
+
+export type OrderStatus =
+  | 'ORDER_RECEIVED'
+  | 'CHECKING_STOCK'
+  | 'IN_PRODUCTION'
+  | 'MANUFACTURED'
+  | 'SHIPPED'
+  | 'CANCELLED';
+
+export interface ProductionOrder {
+  id: string;
+  reference?: string;
+  dealId?: string;
+  clientName?: string;
+  status: OrderStatus;
+  productName?: string;
+  quantity?: number;
+  startedAt?: string;
+  estimatedEnd?: string;
+  createdAt: string;
+}
+
+// ─── API payloads ─────────────────────────────────────────────────────────────
 
 export interface CreateDealPayload {
   name: string;
@@ -62,31 +130,13 @@ export interface CreateDealPayload {
   items?: DealItem[];
 }
 
+// ─── Metrics ─────────────────────────────────────────────────────────────────
+
 export interface PipelineMetrics {
   activeDeals: number;
   pipelineValue: number;
   closeRate: number;
   aiEmails: number;
-}
-
-// ─── Production Orders ────────────────────────────────────────────────────────
-
-export type OrderStatus =
-  | 'PENDING'
-  | 'IN_PRODUCTION'
-  | 'QUALITY_CHECK'
-  | 'COMPLETED'
-  | 'CANCELLED';
-
-export interface ProductionOrder {
-  id: string;
-  dealId?: string;
-  status: OrderStatus;
-  productName?: string;
-  quantity?: number;
-  startedAt?: string;
-  estimatedEnd?: string;
-  createdAt: string;
 }
 
 // ─── Inbox / Emails ──────────────────────────────────────────────────────────
