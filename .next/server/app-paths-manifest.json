@@ -1,7 +1,7 @@
 {
-  "/crm/pipeline/page": "app/crm/pipeline/page.js",
+  "/crm/companies/page": "app/crm/companies/page.js",
   "/overview/page": "app/overview/page.js",
-  "/system/settings/page": "app/system/settings/page.js",
-  "/crm/inbox/page": "app/crm/inbox/page.js",
-  "/scm/boms/page": "app/scm/boms/page.js"
+  "/scm/boms/page": "app/scm/boms/page.js",
+  "/system/users/page": "app/system/users/page.js",
+  "/system/settings/page": "app/system/settings/page.js"
 }

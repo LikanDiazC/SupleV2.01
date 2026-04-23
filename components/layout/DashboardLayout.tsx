@@ -1,3 +1,8 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import Sidebar from './Sidebar';
 import TopHeader from './TopHeader';
 
@@ -8,6 +13,24 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children, title, subtitle }: DashboardLayoutProps) {
+  const router = useRouter();
+  const { user, loading } = useCurrentUser();
+
+  useEffect(() => {
+    if (!loading && user === null) {
+      router.push('/login');
+    }
+  }, [loading, user, router]);
+
+  // Blank screen while resolving auth — prevents content flash
+  if (loading || user === null) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-50">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
       <Sidebar />

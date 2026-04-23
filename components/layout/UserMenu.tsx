@@ -46,7 +46,7 @@ function MenuItem({ icon: Icon, label, href, onClick, danger = false }: MenuItem
 
 export default function UserMenu() {
   const router = useRouter();
-  const user = useCurrentUser();
+  const { user } = useCurrentUser();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
