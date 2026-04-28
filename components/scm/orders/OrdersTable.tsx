@@ -29,9 +29,10 @@ const TH = ({ children }: { children: React.ReactNode }) => (
 interface OrdersTableProps {
   orders: ProductionOrder[];
   loading: boolean;
+  onViewFlow?: (id: string) => void;
 }
 
-export default function OrdersTable({ orders, loading }: OrdersTableProps) {
+export default function OrdersTable({ orders, loading, onViewFlow }: OrdersTableProps) {
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
@@ -92,7 +93,15 @@ export default function OrdersTable({ orders, loading }: OrdersTableProps) {
               </tr>
             ) : (
               filtered.map((order) => (
-                <tr key={order.id} className="group transition hover:bg-slate-50">
+                <tr 
+                  key={order.id} 
+                  className="group transition hover:bg-slate-50 cursor-pointer"
+                  onClick={(e) => {
+                    // Prevent row click if clicking the action menu
+                    if ((e.target as HTMLElement).closest('.action-menu-container')) return;
+                    onViewFlow?.(order.id);
+                  }}
+                >
                   {/* Referencia */}
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-2">
@@ -103,11 +112,6 @@ export default function OrdersTable({ orders, loading }: OrdersTableProps) {
                         <p className="font-mono text-sm font-semibold text-slate-900">
                           {order.reference ?? order.id.slice(-8).toUpperCase()}
                         </p>
-                        {order.dealId && (
-                          <p className="font-mono text-[10px] text-slate-400">
-                            Deal: {order.dealId.slice(-8)}
-                          </p>
-                        )}
                       </div>
                     </div>
                   </td>
@@ -142,13 +146,18 @@ export default function OrdersTable({ orders, loading }: OrdersTableProps) {
                   </td>
 
                   {/* Acciones */}
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-3.5 action-menu-container">
                     <ActionMenu
                       items={[
                         {
                           label: 'Ver detalle',
                           icon: ExternalLink,
                           onClick: () => {},
+                        },
+                        {
+                          label: 'Ver flujo de orden',
+                          icon: ClipboardList,
+                          onClick: () => onViewFlow?.(order.id),
                         },
                       ]}
                     />

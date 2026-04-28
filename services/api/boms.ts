@@ -1,4 +1,4 @@
-import { type Bom, type CreateBomPayload } from '@/types';
+import { type Bom, type CreateBomPayload, type MaterialCuttingPreview } from '@/types';
 import { API_BASE } from '@/lib/utils';
 import { getAccessToken } from '@/lib/auth';
 
@@ -16,8 +16,8 @@ export async function fetchBoms(): Promise<Bom[]> {
   return Array.isArray(data) ? data : [];
 }
 
-export async function createBom(payload: CreateBomPayload): Promise<Bom> {
-  const res = await fetch(`${API_BASE}/boms`, {
+export async function createBom(payload: CreateBomPayload): Promise<void> {
+  const res = await fetch(`${API_BASE}/boms/with-components`, {
     method: 'POST',
     headers: authHeaders(),
     body: JSON.stringify(payload),
@@ -26,7 +26,15 @@ export async function createBom(payload: CreateBomPayload): Promise<Bom> {
     const data = await res.json().catch(() => ({}));
     throw new Error(data?.message ?? `Error ${res.status}`);
   }
-  return res.json();
+}
+
+export async function fetchBomCuttingPreview(bomId: string, quantity = 1): Promise<MaterialCuttingPreview[]> {
+  const res = await fetch(`${API_BASE}/boms/${bomId}/cutting-preview?quantity=${quantity}`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
 }
 
 export async function deleteBom(id: string): Promise<void> {

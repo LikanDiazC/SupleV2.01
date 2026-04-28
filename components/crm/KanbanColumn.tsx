@@ -8,13 +8,27 @@ interface KanbanColumnProps {
   column: KanbanColumnType;
   deals: Deal[];
   onDealClick?: (deal: Deal) => void;
+  onDealDrop?: (dealId: string, stage: string) => void;
 }
 
-export default function KanbanColumn({ column, deals, onDealClick }: KanbanColumnProps) {
+export default function KanbanColumn({ column, deals, onDealClick, onDealDrop }: KanbanColumnProps) {
   const columnTotal = deals.reduce((sum, d) => sum + d.amount, 0);
 
   return (
-    <div className="flex w-72 shrink-0 flex-col rounded-xl border border-slate-100 bg-slate-50/70">
+    <div 
+      className="flex w-72 shrink-0 flex-col rounded-xl border border-slate-100 bg-slate-50/70"
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        const dealId = e.dataTransfer.getData('dealId');
+        if (dealId && onDealDrop) {
+          onDealDrop(dealId, column.stage);
+        }
+      }}
+    >
       {/* Column header */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">

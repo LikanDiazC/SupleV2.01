@@ -52,7 +52,30 @@ export default function LoginPage() {
       };
 
       saveSession(token, storedUser);
-      router.push('/overview');
+
+      try {
+        if (data.hasGoogleLinked) {
+          // Tokens guardados en BD — restaurar sesión Google en memoria
+          await fetch(`${API_BASE}/comms/auth/restore-session`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          router.push('/overview');
+        } else {
+          // Primera vez o tokens expirados — pedir permisos Google
+          const urlRes = await fetch(`${API_BASE}/comms/auth/google-url`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (urlRes.ok) {
+            const { url } = await urlRes.json();
+            window.location.href = url;
+            return;
+          }
+          router.push('/overview');
+        }
+      } catch {
+        router.push('/overview');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido. Intenta de nuevo.');
     } finally {

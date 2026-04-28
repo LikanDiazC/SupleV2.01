@@ -16,6 +16,11 @@ export default function DealCard({ deal, onClick }: DealCardProps) {
   return (
     <div
       onClick={() => onClick?.(deal)}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData('dealId', deal.id);
+        e.dataTransfer.effectAllowed = 'move';
+      }}
       className="group cursor-pointer rounded-xl border border-slate-100 bg-white p-4 shadow-card transition-all duration-150 hover:border-slate-200 hover:shadow-card-hover active:scale-[0.99]"
     >
       {/* Name + Amount */}

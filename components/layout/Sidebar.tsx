@@ -13,6 +13,9 @@ import {
   Package,
   BookOpen,
   ChevronRight,
+  Megaphone,
+  Layers,
+  UsersRound,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getStoredUser } from '@/lib/auth';
@@ -54,7 +57,20 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Órdenes',        href: '/scm/orders',    icon: ClipboardList },
       { label: 'Inventario',     href: '/scm/inventory', icon: Package       },
+      { label: 'Retazos',        href: '/scm/remnants',  icon: Layers        },
       { label: 'Recetas (BOMs)', href: '/scm/boms',      icon: BookOpen      },
+    ],
+  },
+  {
+    title: 'RRHH',
+    items: [
+      { label: 'Mi Equipo', href: '/hr/team', icon: UsersRound },
+    ],
+  },
+  {
+    title: 'MARKETING',
+    items: [
+      { label: 'Ads',  href: '/marketing/ads', icon: Megaphone },
     ],
   },
 ];

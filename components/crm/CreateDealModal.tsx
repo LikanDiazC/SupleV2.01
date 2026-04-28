@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { Plus, Trash2, ShoppingCart, Loader2, AlertCircle } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
-import { type DealItem, type CreateDealPayload } from '@/types';
-import { formatCurrency } from '@/lib/utils';
+import { type DealItem, type CreateDealPayload, type Bom } from '@/types';
 import { createDeal } from '@/services/api/deals';
 import { useFormOptions } from '@/hooks/useFormOptions';
 
@@ -43,28 +42,26 @@ function FormField({
 function ItemRow({
   item,
   index,
-  products,
+  boms,
   onUpdate,
   onRemove,
 }: {
   item: DealItem;
   index: number;
-  products: { id: string; name: string; price?: number }[];
+  boms: Bom[];
   onUpdate: (index: number, field: keyof DealItem, value: string | number) => void;
   onRemove: (index: number) => void;
 }) {
   return (
     <div className="grid grid-cols-[1fr_100px_32px] items-center gap-2">
       <select
-        value={item.productId}
-        onChange={(e) => onUpdate(index, 'productId', e.target.value)}
+        value={item.bomId}
+        onChange={(e) => onUpdate(index, 'bomId', e.target.value)}
         className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
       >
-        <option value="">— Seleccionar —</option>
-        {products.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.name}{p.price ? ` · ${formatCurrency(p.price)}` : ''}
-          </option>
+        <option value="">— Seleccionar receta —</option>
+        {boms.map((b) => (
+          <option key={b.id} value={b.id}>{b.name}</option>
         ))}
       </select>
       <input
@@ -94,11 +91,11 @@ interface Props {
 }
 
 function emptyItem(): DealItem {
-  return { productId: '', quantity: 1 };
+  return { bomId: '', quantity: 1 };
 }
 
 export default function CreateDealModal({ open, onClose, onCreated }: Props) {
-  const { contacts, companies, products } = useFormOptions(open);
+  const { contacts, companies, boms } = useFormOptions(open);
 
   const [name, setName]         = useState('');
   const [amount, setAmount]     = useState('');
@@ -138,7 +135,7 @@ export default function CreateDealModal({ open, onClose, onCreated }: Props) {
     if (!name.trim()) return setError('El nombre del negocio es requerido.');
     if (!amount || isNaN(Number(amount))) return setError('Ingresa un monto válido.');
 
-    const validItems = items.filter((i) => i.productId && i.quantity > 0);
+    const validItems = items.filter((i) => i.bomId && i.quantity > 0);
 
     const payload: CreateDealPayload = {
       name: name.trim(),
@@ -276,7 +273,7 @@ export default function CreateDealModal({ open, onClose, onCreated }: Props) {
               <ShoppingCart className="mx-auto mb-2 h-5 w-5 text-slate-300" />
               <p className="text-xs text-slate-400">Sin productos agregados.</p>
               <p className="mt-0.5 text-[10px] text-slate-300">
-                Los productos gatillan órdenes de producción al ganar la venta.
+                Las recetas seleccionadas gatillan órdenes de producción al ganar la venta.
               </p>
             </div>
           ) : (
@@ -291,14 +288,14 @@ export default function CreateDealModal({ open, onClose, onCreated }: Props) {
                   key={index}
                   item={item}
                   index={index}
-                  products={products}
+                  boms={boms}
                   onUpdate={updateItem}
                   onRemove={removeItem}
                 />
               ))}
-              {products.length === 0 && (
+              {boms.length === 0 && (
                 <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-700">
-                  Sin productos en la API aún — los selects estarán vacíos hasta que existan.
+                  Sin recetas (BOMs) creadas aún — crea una receta en Producción primero.
                 </p>
               )}
             </div>

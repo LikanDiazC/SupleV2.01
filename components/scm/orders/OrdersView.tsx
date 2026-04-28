@@ -7,19 +7,24 @@ import { type OrderStatus } from '@/types';
 import StatusBadge from '@/components/scm/StatusBadge';
 import OrdersTable from './OrdersTable';
 
+import OrderFlowModal from './OrderFlowModal';
+
 const ALL_STATUSES: OrderStatus[] = [
   'ORDER_RECEIVED',
   'CHECKING_STOCK',
+  'ON_HOLD_MATERIALS',
+  'READY_TO_START',
   'IN_PRODUCTION',
   'MANUFACTURED',
   'SHIPPED',
-  'CANCELLED',
+  'DELIVERED',
 ];
 
 export default function OrdersView() {
   const { orders, loading, refresh }      = useOrders();
   const [activeStatus, setActiveStatus]   = useState<OrderStatus | 'ALL'>('ALL');
   const [refreshing, setRefreshing]       = useState(false);
+  const [flowOrderId, setFlowOrderId]     = useState<string | null>(null);
 
   async function handleRefresh() {
     setRefreshing(true);
@@ -97,7 +102,11 @@ export default function OrdersView() {
         })}
       </div>
 
-      <OrdersTable orders={filtered} loading={loading} />
+      <OrdersTable orders={filtered} loading={loading} onViewFlow={setFlowOrderId} />
+
+      {flowOrderId && (
+        <OrderFlowModal orderId={flowOrderId} onClose={() => setFlowOrderId(null)} />
+      )}
     </>
   );
 }

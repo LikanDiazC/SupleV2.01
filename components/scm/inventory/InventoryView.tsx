@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Plus, RefreshCw } from 'lucide-react';
 import { useInventory } from '@/hooks/useInventory';
-import { deleteInventoryItem } from '@/services/api/inventory';
 import InventoryTable from './InventoryTable';
 import CreateItemSlideOver from './CreateItemSlideOver';
 
@@ -18,16 +17,6 @@ export default function InventoryView() {
     setRefreshing(false);
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('¿Eliminar este ítem del inventario?')) return;
-    try {
-      await deleteInventoryItem(id);
-      await refresh();
-    } catch {
-      alert('No se pudo eliminar el ítem.');
-    }
-  }
-
   return (
     <>
       {/* Top bar */}
@@ -35,7 +24,7 @@ export default function InventoryView() {
         <div>
           <h2 className="text-sm font-semibold text-slate-700">Inventario de Materiales</h2>
           <p className="text-xs text-slate-400">
-            {loading ? 'Cargando...' : `${items.length} ítem${items.length !== 1 ? 's' : ''} registrados`}
+            {loading ? 'Cargando...' : `${items.length} material${items.length !== 1 ? 'es' : ''} registrados`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -52,7 +41,7 @@ export default function InventoryView() {
             className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 active:scale-[0.98]"
           >
             <Plus className="h-4 w-4" />
-            Nuevo Ítem
+            Nuevo Material
           </button>
         </div>
       </div>
@@ -60,7 +49,6 @@ export default function InventoryView() {
       <InventoryTable
         items={items}
         loading={loading}
-        onDelete={handleDelete}
         onNewItem={() => setSlideOpen(true)}
       />
 

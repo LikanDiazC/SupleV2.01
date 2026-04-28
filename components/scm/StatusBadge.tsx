@@ -18,6 +18,16 @@ const STATUS_MAP: Record<OrderStatus, StatusConfig> = {
     className: 'bg-amber-100 text-amber-700',
     dot: 'bg-amber-500',
   },
+  ON_HOLD_MATERIALS: {
+    label: 'Stock Insuficiente',
+    className: 'bg-red-100 text-red-700',
+    dot: 'bg-red-500',
+  },
+  READY_TO_START: {
+    label: 'Lista para Iniciar',
+    className: 'bg-indigo-100 text-indigo-700',
+    dot: 'bg-indigo-500',
+  },
   IN_PRODUCTION: {
     label: 'En Producción',
     className: 'bg-blue-100 text-blue-700',
@@ -30,13 +40,13 @@ const STATUS_MAP: Record<OrderStatus, StatusConfig> = {
   },
   SHIPPED: {
     label: 'Enviada',
-    className: 'bg-emerald-100 text-emerald-700',
-    dot: 'bg-emerald-500',
+    className: 'bg-teal-100 text-teal-700',
+    dot: 'bg-teal-500',
   },
-  CANCELLED: {
-    label: 'Cancelada',
-    className: 'bg-red-100 text-red-700',
-    dot: 'bg-red-500',
+  DELIVERED: {
+    label: 'Entregada',
+    className: 'bg-green-100 text-green-700',
+    dot: 'bg-green-500',
   },
 };
 

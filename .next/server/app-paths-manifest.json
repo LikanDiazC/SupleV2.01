@@ -1,7 +1,1 @@
-{
-  "/crm/pipeline/page": "app/crm/pipeline/page.js",
-  "/crm/inbox/page": "app/crm/inbox/page.js",
-  "/scm/boms/page": "app/scm/boms/page.js",
-  "/overview/page": "app/overview/page.js",
-  "/scm/inventory/page": "app/scm/inventory/page.js"
-}
+{}

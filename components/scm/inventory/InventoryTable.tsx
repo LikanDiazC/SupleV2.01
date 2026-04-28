@@ -1,32 +1,36 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Package, Pencil, Trash2 } from 'lucide-react';
-import { type InventoryItem } from '@/types';
+import { Package } from 'lucide-react';
+import { type Material } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import ActionMenu from '@/components/ui/ActionMenu';
 import EmptyState from '@/components/ui/EmptyState';
 import SearchInput from '@/components/ui/SearchInput';
 import { cn } from '@/lib/utils';
 
-// ── Item type badge ───────────────────────────────────────────────────────────
+const TYPE_LABELS: Record<string, string> = {
+  SHEET: 'Plancha',
+  HARDWARE: 'Herraje',
+  CONSUMABLE: 'Consumible',
+};
 
-function TypeBadge({ type }: { type: InventoryItem['type'] }) {
+function TypeBadge({ type }: { type: Material['materialType'] }) {
   return (
     <span
       className={cn(
         'inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
-        type === 'PRODUCT'
+        type === 'SHEET'
           ? 'bg-brand-50 text-brand-600'
+          : type === 'HARDWARE'
+          ? 'bg-amber-50 text-amber-700'
           : 'bg-slate-100 text-slate-600'
       )}
     >
-      {type === 'PRODUCT' ? 'Producto' : 'Material'}
+      {TYPE_LABELS[type] ?? type}
     </span>
   );
 }
-
-// ── Skeleton row ──────────────────────────────────────────────────────────────
 
 function SkeletonRow() {
   return (
@@ -40,13 +44,9 @@ function SkeletonRow() {
   );
 }
 
-// ── Main table ────────────────────────────────────────────────────────────────
-
 interface InventoryTableProps {
-  items: InventoryItem[];
+  items: Material[];
   loading: boolean;
-  onDelete: (id: string) => void;
-  onEdit?: (item: InventoryItem) => void;
   onNewItem: () => void;
 }
 
@@ -56,13 +56,7 @@ const TH = ({ children }: { children: React.ReactNode }) => (
   </th>
 );
 
-export default function InventoryTable({
-  items,
-  loading,
-  onDelete,
-  onEdit,
-  onNewItem,
-}: InventoryTableProps) {
+export default function InventoryTable({ items, loading, onNewItem }: InventoryTableProps) {
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
@@ -71,14 +65,13 @@ export default function InventoryTable({
       ? items.filter(
           (i) =>
             i.name.toLowerCase().includes(q) ||
-            (i.sku ?? '').toLowerCase().includes(q)
+            i.sku.toLowerCase().includes(q)
         )
       : items;
   }, [items, search]);
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white shadow-card">
-      {/* Table toolbar */}
       {items.length > 0 && (
         <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
           <SearchInput
@@ -87,7 +80,7 @@ export default function InventoryTable({
             placeholder="Buscar por nombre o SKU..."
           />
           <span className="text-xs text-slate-400">
-            {filtered.length} de {items.length} ítem{items.length !== 1 ? 's' : ''}
+            {filtered.length} de {items.length} material{items.length !== 1 ? 'es' : ''}
           </span>
         </div>
       )}
@@ -101,7 +94,7 @@ export default function InventoryTable({
               <TH>Tipo</TH>
               <TH>Stock</TH>
               <TH>Costo unitario</TH>
-              <TH>Acciones</TH>
+              <TH>Unidad</TH>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -115,8 +108,8 @@ export default function InventoryTable({
                     title={search ? 'Sin resultados' : 'Inventario vacío'}
                     description={
                       search
-                        ? `No hay ítems que coincidan con "${search}".`
-                        : 'Agrega tu primer material o producto al inventario.'
+                        ? `No hay materiales que coincidan con "${search}".`
+                        : 'Agrega tu primer material al inventario.'
                     }
                     action={
                       !search ? (
@@ -124,7 +117,7 @@ export default function InventoryTable({
                           onClick={onNewItem}
                           className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
                         >
-                          + Nuevo Ítem
+                          + Nuevo Material
                         </button>
                       ) : undefined
                     }
@@ -136,17 +129,18 @@ export default function InventoryTable({
                 <tr key={item.id} className="group transition hover:bg-slate-50">
                   <td className="px-4 py-3">
                     <p className="text-sm font-medium text-slate-900">{item.name}</p>
-                    {item.unitOfMeasure && (
-                      <p className="text-[11px] text-slate-400">{item.unitOfMeasure}</p>
+                    {item.sheetWidthMm && item.sheetHeightMm && (
+                      <p className="text-[11px] text-slate-400">
+                        {item.sheetWidthMm} × {item.sheetHeightMm} mm
+                        {item.thicknessMm ? ` · ${item.thicknessMm} mm` : ''}
+                      </p>
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="font-mono text-xs text-slate-500">
-                      {item.sku ?? '—'}
-                    </span>
+                    <span className="font-mono text-xs text-slate-500">{item.sku}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <TypeBadge type={item.type} />
+                    <TypeBadge type={item.materialType} />
                   </td>
                   <td className="px-4 py-3">
                     <span
@@ -159,22 +153,10 @@ export default function InventoryTable({
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-700">
-                    {item.unitCost != null ? formatCurrency(item.unitCost) : '—'}
+                    {formatCurrency(item.unitCost)}
                   </td>
-                  <td className="px-4 py-3">
-                    <ActionMenu
-                      items={[
-                        ...(onEdit
-                          ? [{ label: 'Editar', icon: Pencil, onClick: () => onEdit(item) }]
-                          : []),
-                        {
-                          label: 'Eliminar',
-                          icon: Trash2,
-                          danger: true,
-                          onClick: () => onDelete(item.id),
-                        },
-                      ]}
-                    />
+                  <td className="px-4 py-3 text-sm text-slate-500">
+                    {item.unitOfMeasure}
                   </td>
                 </tr>
               ))

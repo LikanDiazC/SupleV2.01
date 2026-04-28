@@ -3,13 +3,13 @@ import { type InboxEmail } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
 import WidgetCard from './WidgetCard';
 import EmptyState from '@/components/ui/EmptyState';
+import { EmailAvatar } from '@/components/ui/EmailAvatar';
 
 function EmailRow({ email }: { email: InboxEmail }) {
   return (
     <div className="group flex items-start gap-3 rounded-xl p-2.5 transition hover:bg-slate-50">
-      {/* Avatar */}
-      <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-[11px] font-bold text-indigo-600">
-        {email.from.slice(0, 2).toUpperCase()}
+      <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100">
+        <EmailAvatar rawSender={email.from} className="h-full w-full" size={64} />
         {!email.read && (
           <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-white bg-brand-500" />
         )}
@@ -53,7 +53,7 @@ export default function InboxWidget({
           description="Los correos entrantes aparecerán aquí."
         />
       ) : (
-        <div className="-mx-2.5 space-y-0.5">
+        <div className="-mx-2.5 space-y-0.5 max-h-[350px] overflow-y-auto pr-1 custom-scrollbar">
           {emails.map((email) => (
             <EmailRow key={email.id} email={email} />
           ))}

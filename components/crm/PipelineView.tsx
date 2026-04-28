@@ -5,6 +5,7 @@ import { Plus, BarChart3, DollarSign, TrendingUp, Bot, RefreshCw } from 'lucide-
 import { type KanbanColumn } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { useDeals } from '@/hooks/useDeals';
+import { updateDealStage } from '@/services/api/deals';
 import { usePipelineMetrics } from '@/hooks/usePipelineMetrics';
 import MetricCard from '@/components/ui/MetricCard';
 import KanbanColumnComponent from './KanbanColumn';
@@ -22,6 +23,18 @@ export default function PipelineView() {
   const { deals, loading, refreshing, refresh } = useDeals();
   const metrics = usePipelineMetrics(deals);
   const [modalOpen, setModalOpen] = useState(false);
+
+  const handleDealDrop = async (dealId: string, targetStage: string) => {
+    const deal = deals.find(d => d.id === dealId);
+    if (!deal || deal.stage === targetStage) return;
+    
+    try {
+      await updateDealStage(dealId, targetStage);
+      await refresh();
+    } catch (e) {
+      console.error('Failed to move deal', e);
+    }
+  };
 
   const dealsByStage = COLUMNS.reduce<Record<string, typeof deals>>(
     (acc, col) => ({ ...acc, [col.stage]: deals.filter((d) => d.stage === col.stage) }),
@@ -74,6 +87,7 @@ export default function PipelineView() {
             key={col.stage}
             column={col}
             deals={dealsByStage[col.stage] ?? []}
+            onDealDrop={handleDealDrop}
           />
         ))}
       </div>
