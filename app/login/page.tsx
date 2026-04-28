@@ -60,7 +60,7 @@ export default function LoginPage() {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
           });
-          setTimeout(() => router.push('/overview'), 100);
+          router.replace('/overview');
         } else {
           // Primera vez o tokens expirados — pedir permisos Google
           const urlRes = await fetch(`${API_BASE}/comms/auth/google-url`, {
@@ -71,10 +71,10 @@ export default function LoginPage() {
             window.location.href = url;
             return;
           }
-          setTimeout(() => router.push('/overview'), 100);
+          router.replace('/overview');
         }
       } catch {
-        setTimeout(() => router.push('/overview'), 100);
+        router.replace('/overview');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido. Intenta de nuevo.');
