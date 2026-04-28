@@ -126,6 +126,12 @@ export default function InboxPage() {
       if (data.length > 0) setSelectedEmail(data[0]);
       setLoading(false);
     });
+
+    const interval = setInterval(() => {
+      fetchInboxEmails().then(data => setEmails(data));
+    }, 15000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const filtered = emails.filter(e =>
