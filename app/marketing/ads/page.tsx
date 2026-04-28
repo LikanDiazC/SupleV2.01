@@ -219,7 +219,7 @@ export default function AdsPage() {
                       <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-35} textAnchor="end" />
                       <YAxis tick={{ fontSize: 11 }} />
                       <Tooltip
-                        formatter={(value: number) => formatCurrency(value)}
+                        formatter={(value) => formatCurrency(Number(value))}
                         contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 12 }}
                       />
                       <Bar dataKey="Inversión" radius={[6, 6, 0, 0]}>

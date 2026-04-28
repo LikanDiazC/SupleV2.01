@@ -204,7 +204,7 @@ function CuttingPreviewSection({ bomId }: { bomId: string }) {
   return (
     <div className="space-y-8">
       {preview.map((mat) => {
-        const uniqueLabels = [...new Set(mat.layouts.flatMap(l => l.pieces.map(p => p.label)))];
+        const uniqueLabels = Array.from(new Set(mat.layouts.flatMap(l => l.pieces.map(p => p.label))));
         const colorMap = new Map(uniqueLabels.map((lbl, i) => [lbl, PIECE_PALETTE[i % PIECE_PALETTE.length]]));
         const totalRemnants = mat.remnants.length;
 
