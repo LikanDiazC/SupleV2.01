@@ -22,6 +22,8 @@ export interface StoredUser {
   name?: string;
   email?: string;
   tenantName?: string;
+  mustChangePassword?: boolean;
+  hasGoogleLinked?: boolean;
 }
 
 export function getStoredUser(): StoredUser | null {
