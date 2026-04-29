@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import ChangePasswordModal from './ChangePasswordModal';
 import Sidebar from './Sidebar';
 import TopHeader from './TopHeader';
 
@@ -22,7 +23,6 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
     }
   }, [loading, user, router]);
 
-  // Blank screen while resolving auth — prevents content flash
   if (loading || user === null) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50">
@@ -33,6 +33,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
+      {user.mustChangePassword && <ChangePasswordModal />}
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopHeader title={title} subtitle={subtitle} />
