@@ -22,6 +22,13 @@ export async function fetchEmployeeTasks(employeeId: string): Promise<HrTask[]> 
   return Array.isArray(data) ? data : [];
 }
 
+export async function fetchMyTasks(): Promise<HrTask[]> {
+  const res = await fetch(`${API_BASE}/hr/my-tasks`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
+}
+
 export async function createTask(payload: CreateTaskPayload): Promise<HrTask> {
   const res = await fetch(`${API_BASE}/hr/tasks`, {
     method: 'POST',
