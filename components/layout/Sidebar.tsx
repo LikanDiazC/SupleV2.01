@@ -16,6 +16,7 @@ import {
   Megaphone,
   Layers,
   UsersRound,
+  Store,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getStoredUser } from '@/lib/auth';
@@ -59,6 +60,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Inventario',     href: '/scm/inventory', icon: Package       },
       { label: 'Retazos',        href: '/scm/remnants',  icon: Layers        },
       { label: 'Recetas (BOMs)', href: '/scm/boms',      icon: BookOpen      },
+      { label: 'Catálogo',       href: '/scm/catalogo',  icon: Store         },
     ],
   },
   {

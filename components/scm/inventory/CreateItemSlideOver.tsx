@@ -121,17 +121,18 @@ export default function CreateItemSlideOver({ open, onClose, onCreated }: Props)
           </FormField>
           <FormField label="Costo unitario">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">CLP</span>
               <input type="number" min="0" step="0.01" value={form.unitCost}
                 onChange={(e) => set('unitCost', Number(e.target.value))}
-                placeholder="0.00" className={`${inputCls} pl-7`} />
+                placeholder="0" className={`${inputCls} pl-12`} />
             </div>
           </FormField>
         </div>
 
         <FormField label="Stock inicial">
           <input type="number" min="0" step="1" value={form.stock}
-            onChange={(e) => set('stock', Number(e.target.value))}
+            onChange={(e) => set('stock', e.target.value === '' ? 0 : Number(e.target.value))}
+            onFocus={(e) => e.target.select()}
             className={inputCls} />
         </FormField>
 

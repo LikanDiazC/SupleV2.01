@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { CartProvider } from '@/context/CartContext';
 import ChangePasswordModal from './ChangePasswordModal';
 import Sidebar from './Sidebar';
 import TopHeader from './TopHeader';
@@ -32,13 +33,15 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
-      {user.mustChangePassword && <ChangePasswordModal />}
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <TopHeader title={title} subtitle={subtitle} />
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+    <CartProvider>
+      <div className="flex h-screen overflow-hidden bg-slate-50">
+        {user.mustChangePassword && <ChangePasswordModal />}
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <TopHeader title={title} subtitle={subtitle} />
+          <main className="flex-1 overflow-auto p-6">{children}</main>
+        </div>
       </div>
-    </div>
+    </CartProvider>
   );
 }

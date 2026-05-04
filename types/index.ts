@@ -316,3 +316,43 @@ export interface KanbanColumn {
   color: string;
   dotColor: string;
 }
+
+// ─── Marketplace ──────────────────────────────────────────────────────────────
+
+export interface MarketplaceProduct {
+  id: string;
+  tienda: 'sodimac' | 'easy';
+  sku: string;
+  marca?: string;
+  titulo: string;
+  urlProducto: string;
+  urlImagen?: string;
+  precioCLP?: number;
+  precioNormalCLP?: number;
+  descuentoPct?: number;
+  rating?: number;
+  categorias?: { cat1?: string; cat2?: string; cat3?: string; cat4?: string };
+  atributos?: Record<string, unknown>;
+  disponibilidad?: string;
+}
+
+export interface MarketplaceProductsResponse {
+  items: MarketplaceProduct[];
+  total: number;
+  page: number;
+}
+
+export interface CartItem {
+  id: string;
+  cartId: string;
+  productId: string;
+  quantity: number;
+  product: MarketplaceProduct;
+}
+
+export interface Cart {
+  id: string;
+  userId: string;
+  tenantId: string;
+  items: CartItem[];
+}
