@@ -24,6 +24,12 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
     }
   }, [loading, user, router]);
 
+  useEffect(() => {
+    function onExpired() { router.push('/login'); }
+    window.addEventListener('auth:expired', onExpired);
+    return () => window.removeEventListener('auth:expired', onExpired);
+  }, [router]);
+
   if (loading || user === null) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50">

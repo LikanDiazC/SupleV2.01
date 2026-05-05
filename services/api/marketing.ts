@@ -1,6 +1,5 @@
-import { getAccessToken } from '@/lib/auth';
-
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+import { API_BASE } from '@/lib/utils';
+import { apiFetch } from '@/lib/apiFetch';
 
 export interface AdCampaignDto {
   id: string;
@@ -27,19 +26,11 @@ export interface MarketingDashboard {
 }
 
 export async function fetchMarketingDashboard(): Promise<MarketingDashboard> {
-  const token = getAccessToken();
-  const res = await fetch(`${API}/marketing/dashboard`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
-
+  const res = await apiFetch(`${API_BASE}/marketing/dashboard`);
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({}));
     throw new Error(errorBody.message || 'Error al cargar datos de Marketing');
   }
-
   const json = await res.json();
   return json.data;
 }

@@ -1,16 +1,9 @@
 import { type Product, type CreateProductPayload } from '@/types';
 import { API_BASE } from '@/lib/utils';
-import { getAccessToken } from '@/lib/auth';
-
-function authHeaders() {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${getAccessToken() ?? ''}`,
-  };
-}
+import { apiFetch } from '@/lib/apiFetch';
 
 export async function fetchProducts(): Promise<Product[]> {
-  const res = await fetch(`${API_BASE}/products`, { headers: authHeaders() });
+  const res = await apiFetch(`${API_BASE}/products`);
   if (!res.ok) return [];
   const data = await res.json();
   if (!Array.isArray(data)) return [];
@@ -21,15 +14,14 @@ export async function fetchProducts(): Promise<Product[]> {
     sku:         p.sku,
     description: p.description,
     salePrice:   p.salePrice,
-    price:       p.salePrice,   // alias para UI
+    price:       p.salePrice,
     stock:       p.stock,
   }));
 }
 
 export async function createProduct(payload: CreateProductPayload): Promise<Product> {
-  const res = await fetch(`${API_BASE}/products`, {
+  const res = await apiFetch(`${API_BASE}/products`, {
     method: 'POST',
-    headers: authHeaders(),
     body: JSON.stringify(payload),
   });
   if (!res.ok) {

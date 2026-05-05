@@ -1,13 +1,6 @@
 import { type MarketplaceProduct, type MarketplaceProductsResponse, type Cart, type CartItem } from '@/types';
 import { API_BASE } from '@/lib/utils';
-import { getAccessToken } from '@/lib/auth';
-
-function authHeaders() {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${getAccessToken() ?? ''}`,
-  };
-}
+import { apiFetch } from '@/lib/apiFetch';
 
 export async function fetchMarketplaceProducts(params: {
   search?: string;
@@ -23,22 +16,21 @@ export async function fetchMarketplaceProducts(params: {
   if (params.page)      qs.set('page', String(params.page));
   if (params.limit)     qs.set('limit', String(params.limit));
 
-  const res = await fetch(`${API_BASE}/marketplace/products?${qs}`, { headers: authHeaders() });
+  const res = await apiFetch(`${API_BASE}/marketplace/products?${qs}`);
   if (!res.ok) throw new Error(`Error ${res.status}: No se pudieron cargar los productos`);
   return res.json();
 }
 
 export async function fetchCart(): Promise<Cart | null> {
-  const res = await fetch(`${API_BASE}/marketplace/cart`, { headers: authHeaders() });
+  const res = await apiFetch(`${API_BASE}/marketplace/cart`);
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Error ${res.status}`);
   return res.json();
 }
 
 export async function addCartItem(productId: string, quantity: number): Promise<CartItem> {
-  const res = await fetch(`${API_BASE}/marketplace/cart/items`, {
+  const res = await apiFetch(`${API_BASE}/marketplace/cart/items`, {
     method: 'POST',
-    headers: authHeaders(),
     body: JSON.stringify({ productId, quantity }),
   });
   if (!res.ok) throw new Error(`Error ${res.status}`);
@@ -46,34 +38,30 @@ export async function addCartItem(productId: string, quantity: number): Promise<
 }
 
 export async function updateCartItem(itemId: string, quantity: number): Promise<void> {
-  const res = await fetch(`${API_BASE}/marketplace/cart/items/${itemId}`, {
+  const res = await apiFetch(`${API_BASE}/marketplace/cart/items/${itemId}`, {
     method: 'PATCH',
-    headers: authHeaders(),
     body: JSON.stringify({ quantity }),
   });
   if (!res.ok) throw new Error(`Error ${res.status}`);
 }
 
 export async function removeCartItem(itemId: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/marketplace/cart/items/${itemId}`, {
+  const res = await apiFetch(`${API_BASE}/marketplace/cart/items/${itemId}`, {
     method: 'DELETE',
-    headers: authHeaders(),
   });
   if (!res.ok) throw new Error(`Error ${res.status}`);
 }
 
 export async function clearCartByStore(tienda: 'easy' | 'sodimac'): Promise<void> {
-  const res = await fetch(`${API_BASE}/marketplace/cart/items?tienda=${tienda}`, {
+  const res = await apiFetch(`${API_BASE}/marketplace/cart/items?tienda=${tienda}`, {
     method: 'DELETE',
-    headers: authHeaders(),
   });
   if (!res.ok) throw new Error(`Error ${res.status}`);
 }
 
 export async function clearCart(): Promise<void> {
-  const res = await fetch(`${API_BASE}/marketplace/cart`, {
+  const res = await apiFetch(`${API_BASE}/marketplace/cart`, {
     method: 'DELETE',
-    headers: authHeaders(),
   });
   if (!res.ok) throw new Error(`Error ${res.status}`);
 }

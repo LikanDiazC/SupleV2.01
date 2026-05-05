@@ -1,16 +1,9 @@
 import { type ProductionOrder } from '@/types';
 import { API_BASE } from '@/lib/utils';
-import { getAccessToken } from '@/lib/auth';
-
-function authHeaders() {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${getAccessToken() ?? ''}`,
-  };
-}
+import { apiFetch } from '@/lib/apiFetch';
 
 export async function fetchOrders(): Promise<ProductionOrder[]> {
-  const res = await fetch(`${API_BASE}/orders`, { headers: authHeaders() });
+  const res = await apiFetch(`${API_BASE}/orders`);
   if (!res.ok) return [];
   const data = await res.json();
   return Array.isArray(data) ? data : [];
@@ -29,9 +22,8 @@ export type OrderAction =
   | 'deliver';
 
 export async function advanceOrder(orderId: string, action: OrderAction): Promise<string> {
-  const res = await fetch(`${API_BASE}/orders/${orderId}/${action}`, {
+  const res = await apiFetch(`${API_BASE}/orders/${orderId}/${action}`, {
     method: 'PATCH',
-    headers: authHeaders(),
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
