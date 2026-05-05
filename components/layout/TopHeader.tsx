@@ -6,7 +6,6 @@ import UserMenu from './UserMenu';
 import { useCartContext } from '@/context/CartContext';
 import CartDrawer from '@/components/scm/catalogo/CartDrawer';
 import CheckoutConfirmModal, { type CheckoutResults } from '@/components/scm/catalogo/CheckoutConfirmModal';
-import { runVtexCheckout } from '@/hooks/useVtexCheckout';
 
 const IDLE_RESULTS: CheckoutResults = {
   easy: 'idle', sodimac: 'idle',
@@ -40,17 +39,19 @@ export default function TopHeader({ title, subtitle }: TopHeaderProps) {
       setCartOpen(false);
       setConfirmOpen(true);
 
-      // Easy — VTEX API called from browser (avoids Railway IP banning)
+      // Easy — abre cada producto en Easy.cl directamente (VTEX API bloqueada por WAF)
       if (easyItems.length > 0) {
-        const vtexResult = await runVtexCheckout(
-          easyItems.map(i => ({ sku: i.product.sku, quantity: i.quantity, titulo: i.product.titulo })),
-        );
-        if (vtexResult.status === 'success' && vtexResult.cartUrl) {
-          window.open(vtexResult.cartUrl, '_blank');
-          setResults(prev => ({ ...prev, easy: 'success' }));
-        } else {
-          setResults(prev => ({ ...prev, easy: 'error', easyError: vtexResult.error }));
+        for (const item of easyItems) {
+          if (item.product.urlProducto) {
+            window.open(item.product.urlProducto, '_blank');
+          }
         }
+        const count = easyItems.length;
+        setResults(prev => ({
+          ...prev,
+          easy: 'success',
+          easySuccessMsg: `${count} producto${count !== 1 ? 's' : ''} abierto${count !== 1 ? 's' : ''} en Easy.cl`,
+        }));
       }
 
       // Sodimac — Chrome Extension postMessage

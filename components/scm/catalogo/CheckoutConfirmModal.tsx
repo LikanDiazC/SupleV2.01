@@ -9,6 +9,7 @@ export interface CheckoutResults {
   sodimac: StoreCheckoutStatus;
   easyError?: string;
   sodimacError?: string;
+  easySuccessMsg?: string;
   hasEasyItems: boolean;
   hasSodimacItems: boolean;
 }
@@ -30,9 +31,9 @@ function StatusIcon({ status }: { status: StoreCheckoutStatus }) {
   return null;
 }
 
-function statusLabel(status: StoreCheckoutStatus, error?: string): string {
+function statusLabel(status: StoreCheckoutStatus, error?: string, successMsg?: string): string {
   if (status === 'loading') return 'Preparando...';
-  if (status === 'success') return 'Carrito listo';
+  if (status === 'success') return successMsg ?? 'Carrito listo';
   if (status === 'error')   return error ?? 'Error al preparar el carrito';
   if (status === 'skipped') return 'Sin items';
   return '';
@@ -64,7 +65,7 @@ export default function CheckoutConfirmModal({
                 <StatusIcon status={results.easy} />
                 <div>
                   <p className="text-sm font-medium text-slate-800">Easy</p>
-                  <p className="text-xs text-slate-500">{statusLabel(results.easy, results.easyError)}</p>
+                  <p className="text-xs text-slate-500">{statusLabel(results.easy, results.easyError, results.easySuccessMsg)}</p>
                 </div>
               </div>
             )}
