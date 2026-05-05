@@ -1,8 +1,5 @@
 'use client';
 
-import { API_BASE } from '@/lib/utils';
-import { getAccessToken } from '@/lib/auth';
-
 export type VtexCheckoutStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export interface EasyItem {
@@ -19,22 +16,19 @@ export interface VtexCheckoutResult {
 
 export async function runVtexCheckout(items: EasyItem[]): Promise<VtexCheckoutResult> {
   try {
-    const res = await fetch(`${API_BASE}/marketplace/checkout/easy`, {
+    const res = await fetch('/api/vtex-checkout', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAccessToken() ?? ''}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: items.map(i => ({ sku: i.sku, quantity: i.quantity })) }),
     });
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({})) as { message?: string };
-      return { status: 'error', error: err.message ?? `Error ${res.status} al crear carrito en Easy` };
+    const data = await res.json() as { cartUrl?: string; error?: string };
+
+    if (!res.ok || data.error) {
+      return { status: 'error', error: data.error ?? `Error ${res.status} al crear carrito en Easy` };
     }
 
-    const { cartUrl } = await res.json() as { cartUrl: string };
-    return { status: 'success', cartUrl };
+    return { status: 'success', cartUrl: data.cartUrl };
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'Error desconocido al conectar con Easy';
     return { status: 'error', error: msg };
