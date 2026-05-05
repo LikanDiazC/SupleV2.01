@@ -1,15 +1,17 @@
 'use client';
 
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, ExternalLink } from 'lucide-react';
 
 export type StoreCheckoutStatus = 'idle' | 'loading' | 'success' | 'error' | 'skipped';
+
+export interface EasyProductLink { titulo: string; url: string; }
 
 export interface CheckoutResults {
   easy: StoreCheckoutStatus;
   sodimac: StoreCheckoutStatus;
   easyError?: string;
   sodimacError?: string;
-  easySuccessMsg?: string;
+  easyProductLinks?: EasyProductLink[];
   hasEasyItems: boolean;
   hasSodimacItems: boolean;
 }
@@ -31,9 +33,9 @@ function StatusIcon({ status }: { status: StoreCheckoutStatus }) {
   return null;
 }
 
-function statusLabel(status: StoreCheckoutStatus, error?: string, successMsg?: string): string {
+function statusLabel(status: StoreCheckoutStatus, error?: string): string {
   if (status === 'loading') return 'Preparando...';
-  if (status === 'success') return successMsg ?? 'Carrito listo';
+  if (status === 'success') return 'Abre cada producto y agrégalo al carrito de Easy.cl';
   if (status === 'error')   return error ?? 'Error al preparar el carrito';
   if (status === 'skipped') return 'Sin items';
   return '';
@@ -56,17 +58,35 @@ export default function CheckoutConfirmModal({
     <>
       <div className="fixed inset-0 z-50 bg-black/30" />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl p-6 space-y-5">
+        <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
           <h2 className="text-base font-semibold text-slate-900">¿Completaste tu compra?</h2>
 
           <div className="space-y-3">
             {results.hasEasyItems && (
-              <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
-                <StatusIcon status={results.easy} />
-                <div>
-                  <p className="text-sm font-medium text-slate-800">Easy</p>
-                  <p className="text-xs text-slate-500">{statusLabel(results.easy, results.easyError, results.easySuccessMsg)}</p>
+              <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 space-y-2">
+                <div className="flex items-center gap-3">
+                  <StatusIcon status={results.easy} />
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">Easy</p>
+                    <p className="text-xs text-slate-500">{statusLabel(results.easy, results.easyError)}</p>
+                  </div>
                 </div>
+                {easyOk && results.easyProductLinks && results.easyProductLinks.length > 0 && (
+                  <div className="space-y-1 pt-1">
+                    {results.easyProductLinks.map((link, i) => (
+                      <a
+                        key={i}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-brand-600 hover:bg-brand-50 transition"
+                      >
+                        <ExternalLink className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{link.titulo}</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
             {results.hasSodimacItems && (

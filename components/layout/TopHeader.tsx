@@ -5,7 +5,7 @@ import { Search, Bell, Command, ShoppingCart } from 'lucide-react';
 import UserMenu from './UserMenu';
 import { useCartContext } from '@/context/CartContext';
 import CartDrawer from '@/components/scm/catalogo/CartDrawer';
-import CheckoutConfirmModal, { type CheckoutResults } from '@/components/scm/catalogo/CheckoutConfirmModal';
+import CheckoutConfirmModal, { type CheckoutResults, type EasyProductLink } from '@/components/scm/catalogo/CheckoutConfirmModal';
 
 const IDLE_RESULTS: CheckoutResults = {
   easy: 'idle', sodimac: 'idle',
@@ -39,19 +39,12 @@ export default function TopHeader({ title, subtitle }: TopHeaderProps) {
       setCartOpen(false);
       setConfirmOpen(true);
 
-      // Easy — abre cada producto en Easy.cl directamente (VTEX API bloqueada por WAF)
+      // Easy — muestra links directamente en el modal (VTEX API bloqueada por WAF)
       if (easyItems.length > 0) {
-        for (const item of easyItems) {
-          if (item.product.urlProducto) {
-            window.open(item.product.urlProducto, '_blank');
-          }
-        }
-        const count = easyItems.length;
-        setResults(prev => ({
-          ...prev,
-          easy: 'success',
-          easySuccessMsg: `${count} producto${count !== 1 ? 's' : ''} abierto${count !== 1 ? 's' : ''} en Easy.cl`,
-        }));
+        const links = easyItems
+          .filter(i => i.product.urlProducto)
+          .map(i => ({ titulo: i.product.titulo, url: i.product.urlProducto! }));
+        setResults(prev => ({ ...prev, easy: 'success', easyProductLinks: links }));
       }
 
       // Sodimac — Chrome Extension postMessage
