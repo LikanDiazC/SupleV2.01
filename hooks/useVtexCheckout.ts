@@ -1,6 +1,7 @@
 'use client';
 
-const VTEX_BASE = 'https://easycl.vteximg.com.br/api/checkout/pub';
+import { API_BASE } from '@/lib/utils';
+import { getAccessToken } from '@/lib/auth';
 
 export type VtexCheckoutStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -16,58 +17,23 @@ export interface VtexCheckoutResult {
   error?: string;
 }
 
-async function resolveVtexSkuId(sku: string): Promise<string> {
-  try {
-    const res = await fetch(
-      `https://www.easy.cl/api/catalog_system/pub/products/search?fq=referenceId:${sku}`,
-      { headers: { Accept: 'application/json' } },
-    );
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data[0]?.items?.[0]?.itemId) {
-        return data[0].items[0].itemId;
-      }
-    }
-  } catch {
-    // fallback: use SKU directly
-  }
-  return sku;
-}
-
 export async function runVtexCheckout(items: EasyItem[]): Promise<VtexCheckoutResult> {
   try {
-    const formRes = await fetch(`${VTEX_BASE}/orderForm`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: { Accept: 'application/json' },
-    });
-
-    if (!formRes.ok) {
-      return { status: 'error', error: `VTEX no respondió (${formRes.status})` };
-    }
-
-    const { orderFormId } = await formRes.json();
-
-    const orderItems = await Promise.all(
-      items.map(async (item) => ({
-        id: await resolveVtexSkuId(item.sku),
-        quantity: item.quantity,
-        seller: '1',
-      })),
-    );
-
-    const addRes = await fetch(`${VTEX_BASE}/orderForm/${orderFormId}/items`, {
+    const res = await fetch(`${API_BASE}/marketplace/checkout/easy`, {
       method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ orderItems }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAccessToken() ?? ''}`,
+      },
+      body: JSON.stringify({ items: items.map(i => ({ sku: i.sku, quantity: i.quantity })) }),
     });
 
-    if (!addRes.ok) {
-      return { status: 'error', error: `No se pudieron agregar los items a Easy (${addRes.status})` };
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({})) as { message?: string };
+      return { status: 'error', error: err.message ?? `Error ${res.status} al crear carrito en Easy` };
     }
 
-    const cartUrl = `https://www.easy.cl/checkout?orderFormId=${orderFormId}#/cart`;
+    const { cartUrl } = await res.json() as { cartUrl: string };
     return { status: 'success', cartUrl };
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'Error desconocido al conectar con Easy';
