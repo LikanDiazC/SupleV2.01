@@ -3,8 +3,6 @@
 import { X, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import CartItemComponent from './CartItem';
-import { useExtensionStatus } from '@/hooks/useExtensionCheckout';
-
 function formatCLP(v: number) {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(v);
 }
@@ -18,8 +16,6 @@ interface CartDrawerProps {
 export default function CartDrawer({ open, onClose, onCheckout }: CartDrawerProps) {
   const { cart, loading } = useCart();
   const items = cart?.items ?? [];
-  const extensionStatus = useExtensionStatus();
-  const hasSodimacItems = items.some(i => i.product.tienda === 'sodimac');
 
   const easyTotal = items
     .filter(i => i.product.tienda === 'easy')
@@ -75,11 +71,6 @@ export default function CartDrawer({ open, onClose, onCheckout }: CartDrawerProp
                 </div>
               )}
             </div>
-            {hasSodimacItems && extensionStatus === 'not_installed' && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                Para automatizar Sodimac, instala la extensión Suplev. Sin ella los productos de Sodimac deberán agregarse manualmente.
-              </div>
-            )}
             <button
               onClick={onCheckout}
               className="w-full rounded-lg bg-brand-500 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600 active:scale-[0.98]"

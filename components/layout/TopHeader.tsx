@@ -5,7 +5,7 @@ import { Search, Bell, Command, ShoppingCart } from 'lucide-react';
 import UserMenu from './UserMenu';
 import { useCartContext } from '@/context/CartContext';
 import CartDrawer from '@/components/scm/catalogo/CartDrawer';
-import CheckoutConfirmModal, { type CheckoutResults, type EasyProductLink } from '@/components/scm/catalogo/CheckoutConfirmModal';
+import CheckoutConfirmModal, { type CheckoutResults } from '@/components/scm/catalogo/CheckoutConfirmModal';
 
 const IDLE_RESULTS: CheckoutResults = {
   easy: 'idle', sodimac: 'idle',
@@ -22,80 +22,30 @@ export default function TopHeader({ title, subtitle }: TopHeaderProps) {
 
   const { cart, itemCount, clearByStore, clearAll } = useCartContext();
 
-  async function handleCheckout() {
+  function handleCheckout() {
     if (!cart || cart.items.length === 0) return;
-    try {
-      const easyItems    = cart.items.filter(i => i.product.tienda === 'easy');
-      const sodimacItems = cart.items.filter(i => i.product.tienda === 'sodimac');
 
-      const init: CheckoutResults = {
-        easy:    easyItems.length > 0 ? 'loading' : 'skipped',
-        sodimac: sodimacItems.length > 0 ? 'loading' : 'skipped',
-        hasEasyItems:    easyItems.length > 0,
-        hasSodimacItems: sodimacItems.length > 0,
-      };
+    const easyItems    = cart.items.filter(i => i.product.tienda === 'easy');
+    const sodimacItems = cart.items.filter(i => i.product.tienda === 'sodimac');
 
-      setResults(init);
-      setCartOpen(false);
-      setConfirmOpen(true);
+    const toLinks = (items: typeof easyItems) =>
+      items.filter(i => i.product.urlProducto).map(i => ({ titulo: i.product.titulo, url: i.product.urlProducto! }));
 
-      // Easy — muestra links directamente en el modal (VTEX API bloqueada por WAF)
-      if (easyItems.length > 0) {
-        const links = easyItems
-          .filter(i => i.product.urlProducto)
-          .map(i => ({ titulo: i.product.titulo, url: i.product.urlProducto! }));
-        setResults(prev => ({ ...prev, easy: 'success', easyProductLinks: links }));
-      }
-
-      // Sodimac — Chrome Extension postMessage
-      if (sodimacItems.length > 0) {
-        const payload = sodimacItems.map(i => ({
-          sku: i.product.sku,
-          quantity: i.quantity,
-          titulo: i.product.titulo,
-          urlProducto: i.product.urlProducto,
-        }));
-
-        window.postMessage({ type: 'SUPLEV_CHECKOUT', items: payload }, '*');
-
-        // Wait for extension response (max 30s)
-        const extensionResult = await new Promise<'success' | 'error' | 'not_installed'>((resolve) => {
-          const timer = setTimeout(() => {
-            window.removeEventListener('message', handler);
-            resolve('not_installed');
-          }, 30000);
-          function handler(e: MessageEvent) {
-            if (e.data?.type === 'SUPLEV_CHECKOUT_RESULT') {
-              clearTimeout(timer);
-              window.removeEventListener('message', handler);
-              resolve(e.data.status);
-            }
-          }
-          window.addEventListener('message', handler);
-        });
-
-        if (extensionResult === 'success') {
-          setResults(prev => ({ ...prev, sodimac: 'success' }));
-        } else if (extensionResult === 'not_installed') {
-          setResults(prev => ({ ...prev, sodimac: 'error', sodimacError: 'Extensión no detectada. Instala la extensión Suplev.' }));
-        } else {
-          setResults(prev => ({ ...prev, sodimac: 'error', sodimacError: 'Error al agregar productos en Sodimac.' }));
-        }
-      }
-    } catch {
-      setResults(prev => ({
-        ...prev,
-        easy: prev.easy === 'loading' ? 'error' : prev.easy,
-        sodimac: prev.sodimac === 'loading' ? 'error' : prev.sodimac,
-        easyError: 'Error inesperado al procesar Easy',
-        sodimacError: 'Error inesperado al procesar Sodimac',
-      }));
-    }
+    setResults({
+      easy:    easyItems.length > 0 ? 'success' : 'skipped',
+      sodimac: sodimacItems.length > 0 ? 'success' : 'skipped',
+      hasEasyItems:    easyItems.length > 0,
+      hasSodimacItems: sodimacItems.length > 0,
+      easyProductLinks:    easyItems.length > 0 ? toLinks(easyItems) : undefined,
+      sodimacProductLinks: sodimacItems.length > 0 ? toLinks(sodimacItems) : undefined,
+    });
+    setCartOpen(false);
+    setConfirmOpen(true);
   }
 
-  async function handleConfirmAll()     { await clearAll();              setConfirmOpen(false); }
-  async function handleConfirmEasy()    { await clearByStore('easy');    setConfirmOpen(false); }
-  async function handleConfirmSodimac() { await clearByStore('sodimac'); setConfirmOpen(false); }
+  function handleConfirmAll()     { void clearAll();              setConfirmOpen(false); }
+  function handleConfirmEasy()    { void clearByStore('easy');    setConfirmOpen(false); }
+  function handleConfirmSodimac() { void clearByStore('sodimac'); setConfirmOpen(false); }
 
   return (
     <>
